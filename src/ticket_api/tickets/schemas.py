@@ -1,10 +1,18 @@
 from datetime import datetime
 import uuid
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class TicketStatusBase(BaseModel):
     name: str
+
+    @field_validator("name", mode="before")
+    @classmethod
+    def validate_name(cls, value: str) -> str:
+        value = value.lower().strip()
+        if not value:
+            raise ValueError("Name cannot be empty.")
+        return value
 
 
 class TicketStatusCreate(TicketStatusBase):
@@ -14,7 +22,7 @@ class TicketStatusCreate(TicketStatusBase):
 class TicketStatusRead(TicketStatusBase):
     model_config: ConfigDict = ConfigDict(from_attributes=True)
 
-    id: str
+    id: uuid.UUID
 
 
 class TicketBase(BaseModel):
@@ -38,4 +46,5 @@ class TicketRead(TicketBase):
     model_config: ConfigDict = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
+    status: TicketStatusRead
     created_at: datetime

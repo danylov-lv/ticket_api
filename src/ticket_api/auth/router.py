@@ -14,3 +14,6 @@ fastapi_users = FastAPIUsers[User, uuid.UUID](
 
 auth_router = fastapi_users.get_auth_router(auth_backend)
 register_router = fastapi_users.get_register_router(UserRead, UserCreate)
+
+get_current_active_user = fastapi_users.current_user(active=True)
+get_current_active_superuser = fastapi_users.current_user(active=True, superuser=True)

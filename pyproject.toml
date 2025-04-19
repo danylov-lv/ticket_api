@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.scripts]
-jta = "ticket_api.cli:main"
+ticket_api = "ticket_api.cli:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

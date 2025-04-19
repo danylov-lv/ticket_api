@@ -32,7 +32,7 @@ class Ticket(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     status_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("ticket_statuses.id"))
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=False),
+        DateTime(timezone=True),
         server_default=func.now(),
         nullable=False,
         default=datetime.now(timezone.utc),
