@@ -5,7 +5,7 @@ from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-from justin_test_api.config import settings
+from ticket_api.config import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -20,8 +20,8 @@ config.set_main_option("sqlalchemy.url", settings.DB_URL.unicode_string())
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from justin_test_api import models  # noqa: E402, F401
-from justin_test_api.db.base import Base  # noqa: E402
+from ticket_api import models  # noqa: E402, F401
+from ticket_api.db.base import Base  # noqa: E402
 
 target_metadata = Base.metadata
 

@@ -1,5 +1,5 @@
 [project]
-name = "justin-test-api"
+name = "ticket-api"
 version = "0.1.0"
 description = ""
 authors = [{ name = "Leonid Danylov", email = "email@example.com" }]
@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.scripts]
-jta = "justin_test_api.cli:main"
+jta = "ticket_api.cli:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
