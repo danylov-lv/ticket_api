@@ -1,0 +1,17 @@
+name: justin-test-api
+
+services:
+  db:
+    image: postgres:latest
+    container_name: justin-test-api-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+
+volumes:
+  data:
