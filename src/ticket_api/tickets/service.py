@@ -16,6 +16,23 @@ from .schemas import (
 )
 
 
+def is_valid_uuid(uuid_to_test: str) -> bool:
+    """Check if a string is a valid UUID.
+
+    Args:
+        uuid_to_test (str): The string to check.
+
+    Returns:
+        bool: True if the string is a valid UUID, False otherwise.
+
+    """
+    try:
+        uuid.UUID(str(uuid_to_test), version=4)
+        return True
+    except ValueError:
+        return False
+
+
 class TicketService:
     """Service class for managing tickets, ticket statuses, and messages.
 
@@ -53,7 +70,17 @@ class TicketService:
         Returns:
             TicketRead: The created ticket data.
 
+        Raises:
+            HTTPException[status_code=404]: If the user or ticket status is not found.
+
         """
+
+        if not await self.user_repository.get(ticket_create.user_id):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+            )
+
         if not await self.ticket_status_repository.exists(ticket_create.status_id):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -74,7 +101,15 @@ class TicketService:
 
         Raises:
             HTTPException[status_code=404]: If the ticket is not found.
+            HTTPException[status_code=422]: If the ticket ID is not a valid UUID.
+
         """
+
+        if not is_valid_uuid(ticket_id):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid ticket ID",
+            )
 
         db_ticket = await self.ticket_repository.get(ticket_id)
         if not db_ticket:
@@ -106,8 +141,15 @@ class TicketService:
 
         Raises:
             HTTPException[status_code=404]: If the user is not found.
+            HTTPException[status_code=422]: If the user ID is not a valid UUID.
 
         """
+
+        if not is_valid_uuid(user_id):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid user ID",
+            )
 
         if not await self.user_repository.get(user_id):
             raise HTTPException(
@@ -135,8 +177,15 @@ class TicketService:
         Raises:
             HTTPException[status_code=404]: If the ticket is not found.
             HTTPException[status_code=404]: If the ticket status is not found.
+            HTTPException[status_code=422]: If the ticket ID is not a valid UUID.
 
         """
+
+        if not is_valid_uuid(ticket_id):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid ticket ID",
+            )
 
         if not await self.ticket_repository.exists(ticket_id):
             raise HTTPException(
@@ -163,8 +212,15 @@ class TicketService:
 
         Raises:
             HTTPException[status_code=404]: If the ticket is not found.
+            HTTPException[status_code=422]: If the ticket ID is not a valid UUID.
 
         """
+
+        if not is_valid_uuid(ticket_id):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid ticket ID",
+            )
 
         if not await self.ticket_repository.exists(ticket_id):
             raise HTTPException(
@@ -178,7 +234,7 @@ class TicketService:
         self,
         ticket_id: uuid.UUID,
         user_id: uuid.UUID,
-    ):
+    ) -> bool:
         """Check if a ticket is accessible by a user.
 
         It checks if both the ticket and user exist, and if the user is either the owner of the ticket or a superuser.
@@ -187,11 +243,27 @@ class TicketService:
             ticket_id (uuid.UUID): The ID of the ticket to check.
             user_id (uuid.UUID): The ID of the user to check.
 
+        Returns:
+            bool: True if the ticket is accessible by the user
+
         Raises:
             HTTPException[status_code=404]: If the ticket or user is not found.
             HTTPException[status_code=403]: If the user does not have permission to access the ticket.
+            HTTPException[status_code=422]: If the ticket ID or user ID is not a valid UUID.
 
         """
+
+        if not is_valid_uuid(ticket_id):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid ticket ID",
+            )
+
+        if not is_valid_uuid(user_id):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid user ID",
+            )
 
         user = await self.user_repository.get(user_id)
         if not user:
@@ -212,6 +284,8 @@ class TicketService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have permission to access this ticket.",
             )
+
+        return True
 
     async def create_ticket_status(
         self,
@@ -252,7 +326,17 @@ class TicketService:
         Returns:
             TicketStatusRead: The ticket status data.
 
+        Raises:
+            HTTPException[status_code=404]: If the ticket status is not found.
+            HTTPException[status_code=422]: If the ticket status ID is not a valid UUID.
+
         """
+
+        if not is_valid_uuid(ticket_status_id):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid ticket status ID",
+            )
 
         db_ticket_status = await self.ticket_status_repository.get(ticket_status_id)
         if not db_ticket_status:
@@ -286,8 +370,16 @@ class TicketService:
 
         Raises:
             HTTPException[status_code=404]: If the ticket status is not found.
+            HTTPException[status_code=422]: If the ticket status ID is not a valid UUID.
 
         """
+
+        if not is_valid_uuid(ticket_status_id):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid ticket status ID",
+            )
+
         if not await self.ticket_status_repository.exists(ticket_status_id):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -310,10 +402,19 @@ class TicketService:
         Returns:
             MessageRead: The created message data.
 
+        Raises:
+            HTTPException[status_code=404]: If the ticket is not found.
+            HTTPException[status_code=422]: If the ticket ID is not a valid UUID.
+
         """
 
-        db_ticket = await self.ticket_repository.get(ticket_id)
-        if not db_ticket:
+        if not is_valid_uuid(ticket_id):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid ticket ID",
+            )
+
+        if not await self.ticket_repository.exists(ticket_id):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Ticket not found",
@@ -339,10 +440,17 @@ class TicketService:
 
         Raises:
             HTTPException[status_code=404]: If the ticket is not found.
+            HTTPException[status_code=422]: If the ticket ID is not a valid UUID.
+
         """
 
-        db_ticket = await self.ticket_repository.get(ticket_id)
-        if not db_ticket:
+        if not is_valid_uuid(ticket_id):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid ticket ID",
+            )
+
+        if not await self.ticket_repository.exists(ticket_id):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Ticket not found",
@@ -363,10 +471,19 @@ class TicketService:
         Returns:
             MessageRead | None: The last customer message for the specified ticket, or None if not found.
 
+        Raises:
+            HTTPException[status_code=404]: If the ticket is not found.
+            HTTPException[status_code=422]: If the ticket ID is not a valid UUID.
+
         """
 
-        db_ticket = await self.ticket_repository.get(ticket_id)
-        if not db_ticket:
+        if not is_valid_uuid(ticket_id):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Invalid ticket ID",
+            )
+
+        if not await self.ticket_repository.exists(ticket_id):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Ticket not found",

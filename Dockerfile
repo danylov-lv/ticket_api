@@ -12,7 +12,7 @@ COPY src/ticket_api ./src/ticket_api
 COPY alembic.ini ./
 COPY README.md ./
 
-RUN poetry install
+RUN poetry install --without dev
 
 EXPOSE 8000
 

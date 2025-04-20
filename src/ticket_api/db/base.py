@@ -32,7 +32,7 @@ class DatabaseSessionManager:
     """
 
     def __init__(self, url: str):
-        self._engine: AsyncEngine = create_async_engine(url, echo=True)
+        self._engine: AsyncEngine = create_async_engine(url)
         self._sessionmaker: AsyncSession = async_sessionmaker(
             autocommit=False,
             bind=self._engine,

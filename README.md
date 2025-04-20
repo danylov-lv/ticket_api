@@ -62,6 +62,13 @@ docker-compose down
 
 This will start the FastAPI server and PostgreSQL database in a Docker container. You can access the API at `http://localhost:8000`.
 
+To run the tests, use the following command:
+```bash
+poetry run pytest tests
+```
+
+Tests are using Testcontainers to run the database in a Docker container. This allows for easy setup and teardown of the database for testing purposes. The tests are organized into different files based on the features they cover. Each test file contains test cases for the corresponding feature, ensuring that all aspects of the feature are tested.
+
 ## Configuration
 
 The project uses environment variables for configuration. Create a `.env` file in the root directory and add the following variables:
