@@ -28,12 +28,11 @@ class TicketStatusRead(TicketStatusBase):
 class TicketBase(BaseModel):
     title: str
     description: str = ""
-    user_id: uuid.UUID
     status_id: uuid.UUID
 
 
 class TicketCreate(TicketBase):
-    pass
+    user_id: uuid.UUID | None = Field(default=None)
 
 
 class TicketUpdate(TicketBase):
@@ -46,5 +45,25 @@ class TicketRead(TicketBase):
     model_config: ConfigDict = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
+    user_id: uuid.UUID
     status: TicketStatusRead
+    created_at: datetime
+    messages: list["MessageRead"]
+
+
+class MessageBase(BaseModel):
+    content: str
+    is_ai: bool = Field(default=False)
+
+
+class MessageCreate(MessageBase):
+    pass
+
+
+class MessageRead(MessageBase):
+    model_config: ConfigDict = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    is_ai: bool
+    ticket_id: uuid.UUID
     created_at: datetime

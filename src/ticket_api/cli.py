@@ -1,25 +1,25 @@
 import asyncio
 from pathlib import Path
-from typer import Typer, Option, prompt, echo, Exit
 
+from fastapi_cli.cli import dev as dev_command
+from fastapi_cli.cli import run as run_command
+from typer import Argument, Exit, Typer, echo, prompt
 
-from fastapi_cli.cli import dev, run
-
+from .auth.dependencies import get_user_repository, get_user_service
 from .auth.schemas import UserCreate
 from .dependencies import get_async_session
-from .auth.dependencies import get_user_repository, get_user_service
 
 app = Typer()
 
 
 @app.command()
-def api(
-    mode: str = Option("dev", help="Mode to run the API in."),
+def run(
+    mode: str = Argument("dev", help="Mode to run the API in."),
 ):
     if mode not in ["dev", "prod"]:
         raise ValueError("Invalid mode. Choose 'dev' or 'prod'.")
 
-    command = dev if mode == "dev" else run
+    command = dev_command if mode == "dev" else run_command
     command(Path("./src/ticket_api/api.py"))
 
 

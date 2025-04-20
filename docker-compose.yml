@@ -1,9 +1,9 @@
-name: justin-test-api
+name: ticket-api
 
 services:
   db:
     image: postgres:latest
-    container_name: justin-test-api-db
+    container_name: ticket-api-db
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -12,6 +12,34 @@ services:
       - "5432:5432"
     volumes:
       - data:/var/lib/postgresql/data
+    networks:
+      - justin-test-api-net
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ticket-api
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_API_BASE: ${OPENAI_API_BASE}
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - justin-test-api-net
 
 volumes:
   data:
+
+
+networks:
+  justin-test-api-net:
+    driver: bridge

@@ -29,6 +29,17 @@ class UserService(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         print(f"Verification requested for user {user.id}. Verification token: {token}")
 
     async def validate_password(self, password: str, user: UserCreate | User) -> None:
+        """Password validation method override.
+
+        This method is called when a user registers or changes their password.
+        It checks if the password meets the required criteria:
+        - At least 8 characters long
+        - Contains at least one digit
+        - Contains at least one uppercase letter
+        - Contains at least one lowercase letter
+        - Contains at least one special character from the defined set
+        """
+
         if len(password) < 8:
             raise InvalidPasswordException(
                 reason="Password must be at least 8 characters long."

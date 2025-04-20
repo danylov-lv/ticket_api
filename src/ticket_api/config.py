@@ -31,5 +31,9 @@ class Settings(BaseSettings):
     PASSWORD_SPECIAL_CHARS: str = "!@#$%^&*?"
     SECRET_KEY: str
 
+    # AI settings
+    OPENAI_API_KEY: str
+    OPENAI_API_BASE: str
+
 
 settings = Settings()

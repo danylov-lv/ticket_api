@@ -25,6 +25,12 @@ class Base(DeclarativeBase):
 
 
 class DatabaseSessionManager:
+    """Database session manager for handling database connections and sessions.
+
+    This class provides methods to create and manage database sessions, as well as to create and drop database tables.
+    This is a powerful tool for managing database connections in an asynchronous environment and encapsulates the logic for handling database sessions and connections.
+    """
+
     def __init__(self, url: str):
         self._engine: AsyncEngine = create_async_engine(url, echo=True)
         self._sessionmaker: AsyncSession = async_sessionmaker(
