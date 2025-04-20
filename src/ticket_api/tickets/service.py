@@ -279,13 +279,16 @@ class TicketService:
                 detail="Ticket not found",
             )
 
-        if not db_ticket.user_id == user_id and not user.is_superuser:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have permission to access this ticket.",
-            )
+        if user.is_superuser:
+            return True
 
-        return True
+        if db_ticket.user_id == user_id:
+            return True
+
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to access this ticket.",
+        )
 
     async def create_ticket_status(
         self,

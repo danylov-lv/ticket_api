@@ -1,6 +1,6 @@
-from fastapi import HTTPException, Request
 import pytest
 import pytest_asyncio
+from fastapi import HTTPException, Request, status
 from fastapi_users.db import SQLAlchemyUserDatabase
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,11 +9,12 @@ from testcontainers.postgres import PostgresContainer
 
 from ticket_api.api import app
 from ticket_api.auth.models import User
+from ticket_api.auth.router import get_current_active_superuser, get_current_active_user
 from ticket_api.auth.schemas import UserCreate, UserRead
 from ticket_api.auth.service import UserService
 from ticket_api.db.base import DatabaseSessionManager
 from ticket_api.dependencies import get_async_session
-from ticket_api.auth.router import get_current_active_user
+from ticket_api.tickets.dependencies import get_ai_service
 
 
 @pytest.fixture(scope="session")
@@ -81,13 +82,18 @@ async def superuser(user_service: UserService):
 
 
 @pytest.fixture
-def authentication_token():
-    return "Bearer authentication_token"
+def user_token():
+    return "Bearer user_token"
 
 
 @pytest.fixture
-def superuser_authentication_token():
-    return "Bearer superuser_authentication_token"
+def superuser_token():
+    return "Bearer superuser_token"
+
+
+@pytest.fixture
+def ai_response():
+    return "Mock AI response."
 
 
 @pytest_asyncio.fixture(scope="function", autouse=True)
@@ -95,7 +101,9 @@ async def dependency_overrides(
     sessionmanager: DatabaseSessionManager,
     user: UserRead,
     superuser: UserRead,
-    authentication_token: str,
+    user_token: str,
+    superuser_token: str,
+    ai_response: str,
 ):
     async def get_async_session_override():
         async with sessionmanager.session() as async_session:
@@ -103,12 +111,61 @@ async def dependency_overrides(
 
     async def get_current_active_user_override(request: Request):
         token = request.headers.get("Authorization")
-        if token == authentication_token:
+        if token == user_token:
             return user
-        elif token == superuser_authentication_token:
+        elif token == superuser_token:
             return superuser
         else:
-            raise HTTPException(status_code=401, detail="Not authenticated")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not authenticated",
+            )
+
+    async def get_current_active_superuser_override(request: Request):
+        token = request.headers.get("Authorization")
+        if token == superuser_token:
+            return superuser
+        elif token == user_token:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not a superuser",
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not authenticated",
+            )
+
+    async def get_ai_service_override():
+        class MockAIService:
+            def build_prompt(
+                self,
+                ticket,
+                message_history,
+                last_customer_message,
+            ):
+                return [
+                    {
+                        "role": "system",
+                        "content": "Mock AI system message.",
+                    },
+                    {
+                        "role": "user",
+                        "content": (
+                            f"Mock AI user message with ticket description: {ticket.description}"
+                        ),
+                    },
+                ]
+
+            async def stream_response(self, prompt):
+                for chunk in ai_response:
+                    yield chunk
+
+        return MockAIService()
 
     app.dependency_overrides[get_async_session] = get_async_session_override
     app.dependency_overrides[get_current_active_user] = get_current_active_user_override
+    app.dependency_overrides[get_current_active_superuser] = (
+        get_current_active_superuser_override
+    )
+    app.dependency_overrides[get_ai_service] = get_ai_service_override

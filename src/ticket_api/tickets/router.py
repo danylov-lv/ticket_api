@@ -24,6 +24,7 @@ router = APIRouter()
 @router.post(
     "/statuses",
     response_model=TicketStatusRead,
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_ticket_status(
     ticket_status_create: TicketStatusCreate,
@@ -85,6 +86,7 @@ async def get_all_tickets(
 @router.post(
     "",
     response_model=TicketRead,
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_ticket(
     ticket_create: TicketCreate,
@@ -123,7 +125,7 @@ async def get_ticket(
     Get a ticket by ID.
     """
 
-    ticket_service.is_ticket_accessible(ticket_id, current_user.id)
+    await ticket_service.is_ticket_accessible(ticket_id, current_user.id)
 
     return await ticket_service.get_ticket(ticket_id)
 
@@ -141,7 +143,7 @@ async def update_ticket(
     """
     Update a ticket by ID.
     """
-    ticket_service.is_ticket_accessible(ticket_id, current_user.id)
+    await ticket_service.is_ticket_accessible(ticket_id, current_user.id)
 
     return await ticket_service.update_ticket(ticket_id, ticket_update)
 
@@ -158,7 +160,7 @@ async def delete_ticket(
     """
     Delete a ticket by ID.
     """
-    ticket_service.is_ticket_accessible(ticket_id, current_user.id)
+    await ticket_service.is_ticket_accessible(ticket_id, current_user.id)
 
     await ticket_service.delete_ticket(ticket_id)
 
@@ -166,6 +168,7 @@ async def delete_ticket(
 @router.post(
     "/{ticket_id}/messages",
     response_model=MessageRead,
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_message(
     ticket_id: uuid.UUID,
@@ -183,7 +186,7 @@ async def create_message(
             detail="AI messages cannot be created manually.",
         )
 
-    ticket_service.is_ticket_accessible(ticket_id, current_user.id)
+    await ticket_service.is_ticket_accessible(ticket_id, current_user.id)
 
     return await ticket_service.create_message(ticket_id, message_create)
 
@@ -207,7 +210,7 @@ async def stream_ai_response(
     After this, to keep track of the conversation, the AI response is saved as a message in the ticket.
 
     """
-    ticket_service.is_ticket_accessible(ticket_id, current_user.id)
+    await ticket_service.is_ticket_accessible(ticket_id, current_user.id)
 
     ticket = await ticket_service.get_ticket(ticket_id)
     message_history = await ticket_service.get_ticket_messages(ticket_id)

@@ -28,7 +28,7 @@ class TicketStatusRead(TicketStatusBase):
 class TicketBase(BaseModel):
     title: str
     description: str = ""
-    status_id: uuid.UUID
+    status_id: uuid.UUID | None = Field(default=None)
 
 
 class TicketCreate(TicketBase):
@@ -46,7 +46,7 @@ class TicketRead(TicketBase):
 
     id: uuid.UUID
     user_id: uuid.UUID
-    status: TicketStatusRead
+    status: TicketStatusRead | None = Field(default=None)
     created_at: datetime
     messages: list["MessageRead"]
 

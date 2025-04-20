@@ -53,7 +53,6 @@ def ticket_service(
 async def ticket_status(ticket_service: TicketService):
     ticket_status_create = TicketStatusCreate(
         name="Open",
-        description="The ticket is open.",
     )
     ticket_status = await ticket_service.create_ticket_status(ticket_status_create)
     return ticket_status

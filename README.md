@@ -148,6 +148,7 @@ The project uses several design patterns to improve code organization and mainta
 ## Challenges Faced
 
 - **AI Integration**: Integrating with the AI provider was challenging due to the need for proper request formatting and handling streaming responses. Also it required implementing service-like interface to support multiple providers and separate concerns. But once the integration was set up, it worked smoothly.
+- **Testing SSE**: Testing the Server-Sent Events (SSE) streaming response was challenging. It required setting up a test client and handling the streaming response properly. The tests were implemented using FastAPI's test client and pytest. In the end, test successfully completes, but never goes to the end. It is a known issue with the test client and SSE. Test commented out, but it is still a good example of how to test SSE in FastAPI.
 
 ## Improvements
 
